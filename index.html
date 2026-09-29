@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Celebration Reminder · Interactive Prototype</title>
+<meta name="description" content="A 2017–18 celebration reminder app concept rebuilt as a clickable prototype: birthdays, anniversaries, wishes and gift cards. Portfolio project by Abhishek Bora.">
+<script>if(/[?&]embed/.test(location.search))document.documentElement.classList.add('embed')</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --p:#984bf8; --p2:#b061f7; --p3:#9a4aeb; --pt:#f4ecff; --pt2:#e6d0ff;
+  --grad:linear-gradient(90deg,#b061f7,#984bf8);
+  --ink:#1b1b22; --ink2:#414146; --mute:#787887; --faint:#b4b4be; --line:#ececf1; --bg:#fff; --soft:#faf8ff;
+  --sh:0 2px 12px rgba(0,0,0,.05),0 1px 2px rgba(0,0,0,.06);
+  --psh:0 6px 14px -4px rgba(154,77,248,.55);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:#f3eefc;height:100%}
+body{font-family:"Nunito Sans","Avenir Next",Avenir,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink2);-webkit-font-smoothing:antialiased;font-size:15px}
+button,input,textarea,select{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer}
+img,svg{display:block}
+.app{position:relative;max-width:430px;margin:0 auto;min-height:100vh;background:var(--bg);overflow:hidden}
+html.embed body{background:#fff}
+html.embed .app{max-width:none}
+.screen{min-height:100vh;padding-bottom:30px;animation:in .28s ease}
+.screen.back{animation:inb .28s ease}
+@keyframes in{from{opacity:0;transform:translateX(22px)}to{opacity:1;transform:none}}
+@keyframes inb{from{opacity:0;transform:translateX(-22px)}to{opacity:1;transform:none}}
+.av{border-radius:50%;object-fit:cover;background:var(--pt)}
+.ini{border-radius:50%;background:var(--pt);color:var(--p);font-weight:800;display:grid;place-items:center}
+
+/* header */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px}
+.ib{width:36px;height:36px;display:grid;place-items:center;border-radius:50%;position:relative}
+.hdr .me{width:38px;height:38px;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.badge{position:absolute;top:5px;right:5px;min-width:16px;height:16px;border-radius:8px;background:var(--p);color:#fff;font-size:10px;font-weight:800;display:grid;place-items:center;padding:0 4px;box-shadow:0 0 0 2px #fff}
+.ttl{display:flex;align-items:center;gap:12px;padding:16px 16px 10px}
+.ttl h1{flex:1;text-align:center;font-size:18px;font-weight:800;color:#000;margin-right:36px}
+
+/* gift banner */
+.banner{margin:4px 16px 0;display:flex;align-items:center;gap:14px;width:calc(100% - 32px);min-height:78px;border-radius:40px;background:var(--grad);color:#fff;padding:12px 22px 12px 14px;box-shadow:0 8px 18px -8px rgba(154,77,248,.7);text-align:left;transition:transform .15s}
+.banner:active{transform:scale(.98)}
+.stack{display:flex;flex:none}
+.stack img{width:48px;height:48px;border:2px solid #fff;margin-left:-18px}
+.stack img:first-child{margin-left:0}
+.banner b{font-size:15px;line-height:20px;font-weight:800}
+.banner .n{display:block;font-size:12px;font-weight:600;opacity:.85;margin-top:2px}
+
+/* calendar */
+.cal{padding:18px 16px 0}
+.mh{display:flex;align-items:center;justify-content:space-between;padding:0 4px}
+.mh h2{font-size:17px;font-weight:700;color:var(--ink2)}
+.mh button{width:36px;height:36px;display:grid;place-items:center;border-radius:50%}
+.mh button:active{background:var(--pt)}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);row-gap:2px;margin-top:10px}
+.dow{font-size:14px;color:var(--ink2);text-align:center;padding:6px 0 12px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.d{position:relative;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:6px;font-size:15px;color:var(--ink2);border-radius:12px}
+.d span{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;transition:background .15s,color .15s}
+.d.out{color:#c9c9d2}
+.d.today span{background:var(--p);color:#fff;font-weight:800;box-shadow:var(--psh)}
+.d.sel:not(.today) span{background:var(--pt);color:var(--p);font-weight:800}
+.d i{position:absolute;bottom:0;display:flex;gap:3px}
+.d i b{width:6px;height:6px;border-radius:50%;background:var(--p)}
+.d.has{cursor:pointer}
+.d.today i{display:none}
+.d.has:active span{transform:scale(.92)}
+.lab{display:flex;justify-content:center;align-items:center;gap:8px;margin:14px 0 6px;font-size:15px;color:var(--mute)}
+.lab button{font-size:13px;font-weight:700;color:var(--p)}
+
+/* event rows */
+.evs{padding:8px 16px 0;display:flex;flex-direction:column;gap:14px}
+.row{position:relative;height:76px}
+.card{position:absolute;inset:0;display:flex;align-items:center;gap:14px;background:#fff;border-radius:40px;box-shadow:var(--sh);padding:0 22px 0 14px;cursor:pointer;transition:transform .32s cubic-bezier(.2,.8,.2,1);z-index:2}
+.card .av,.card .ini{width:48px;height:48px;flex:none}
+.card .ini{font-size:17px}
+.card .t{flex:1;min-width:0}
+.card b{display:block;font-size:15px;font-weight:800;color:var(--ink2)}
+.card .s{display:block;font-size:14px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .s.today{color:var(--p);font-weight:700}
+.card .ic{flex:none;color:var(--p)}
+.tagd{display:inline-block;font-size:11px;font-weight:800;color:#1f9d55;background:#e7f7ee;border-radius:10px;padding:1px 8px;margin-left:6px;vertical-align:2px}
+.acts{position:absolute;right:0;top:0;bottom:0;display:flex;align-items:center;gap:10px;padding-right:2px;z-index:1;opacity:0;transition:opacity .2s}
+.act{width:64px;height:64px;border-radius:50%;background:linear-gradient(180deg,#a355f8,#984bf8);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10px;font-weight:700;box-shadow:var(--psh);transform:scale(.6);transition:transform .3s cubic-bezier(.2,.9,.3,1.3)}
+.row.open .card{transform:translateX(-222px)}
+.row.open .acts{opacity:1}
+.row.open .act{transform:scale(1)}
+.row.open .act:nth-child(2){transition-delay:.04s}
+.row.open .act:nth-child(3){transition-delay:.08s}
+.hint{text-align:center;font-size:12px;color:var(--faint);margin-top:14px}
+.empty{text-align:center;color:var(--mute);font-size:14px;padding:18px 20px}
+.empty .btn{margin-top:12px}
+
+/* buttons */
+.btn{height:46px;min-width:170px;padding:0 26px;border-radius:24px;background:var(--grad);color:#fff;font-size:15px;font-weight:800;box-shadow:var(--psh);display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .12s,opacity .2s}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;box-shadow:none}
+.btn.ghost{background:#fff;color:var(--p);box-shadow:inset 0 0 0 1.5px var(--p)}
+.fab{position:fixed;z-index:30;right:max(20px,calc(50% - 195px));bottom:24px;width:56px;height:56px;border-radius:50%;background:var(--grad);box-shadow:0 10px 22px -8px rgba(154,77,248,.9);display:grid;place-items:center}
+html.embed .fab{right:20px}
+
+/* gifts */
+.gl{padding:6px 16px;display:flex;flex-direction:column;gap:14px}
+.sum{margin:0 16px 4px;border-radius:14px;background:var(--pt);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--mute)}
+.sum b{font-size:18px;color:var(--p);font-weight:800}
+.gc{background:#fff;border-radius:6px;box-shadow:var(--sh);padding:16px 16px 14px 18px}
+.gc .top{display:flex;gap:12px}
+.gc .msg{flex:1;font-size:15px;line-height:21px;color:#000}
+.gc .from{font-size:13px;color:#000;margin-top:3px}
+.gc .av{width:44px;height:44px;flex:none}
+.gc .bot{display:flex;align-items:center;gap:10px;margin-top:12px}
+.gc .amt{font-size:20px;font-weight:600;color:#000}
+.gc .val{flex:1;font-size:12px;color:var(--faint)}
+.pill{height:30px;padding:0 16px;border-radius:16px;color:var(--p3);font-size:13px;font-weight:800;box-shadow:inset 0 0 0 1.5px var(--p3);background:#fff}
+.pill.done{color:#1f9d55;box-shadow:none;background:#e7f7ee;display:inline-grid;place-items:center}
+
+/* send gift */
+.gcard{position:relative;overflow:hidden;margin:6px 16px 0;border-radius:8px;background:linear-gradient(135deg,#b061f7,#984bf8 60%,#913ff8);color:#fff;padding:18px 20px 20px;box-shadow:0 12px 26px -12px rgba(154,77,248,.9)}
+.gcard::before{content:"";position:absolute;right:40px;top:40px;width:84px;height:84px;border-radius:50%;border:22px solid rgba(255,255,255,.12)}
+.gcard::after{content:"";position:absolute;left:-40px;right:-40px;bottom:-70px;height:140px;border-radius:50%;background:rgba(255,255,255,.07)}
+.gcard>*{position:relative;z-index:1}
+.gcard .av{position:absolute;right:18px;top:18px;width:52px;height:52px;border:3px solid #fff}
+.gcard label{display:block;font-size:11px;opacity:.85;margin-top:12px}
+.gcard label:first-of-type{margin-top:0}
+.gcard .v{font-size:23px;font-weight:600;margin-top:2px}
+.amt-in{display:flex;align-items:center;gap:4px;font-size:23px;font-weight:600;margin-top:2px}
+.amt-in input{width:140px;background:transparent;border:0;outline:0;color:#fff;font-size:23px;font-weight:600;border-bottom:1.5px dashed rgba(255,255,255,.5);padding-bottom:1px}
+.gcard textarea{width:100%;height:74px;resize:none;margin-top:4px;background:rgba(255,255,255,.1);border:0;border-radius:6px;outline:0;color:#fff;font-size:16px;line-height:22px;padding:8px 10px}
+.gcard textarea::placeholder{color:rgba(255,255,255,.55)}
+.gcard textarea:focus{background:rgba(255,255,255,.18)}
+.cnt{font-size:11px;opacity:.8;text-align:right;margin-top:4px}
+.chipsA{display:flex;gap:8px;flex-wrap:wrap;margin:16px 16px 0}
+.chipA{height:34px;padding:0 16px;border-radius:17px;background:var(--pt);color:var(--p);font-size:14px;font-weight:800}
+.chipA.on{background:var(--p);color:#fff;box-shadow:var(--psh)}
+.center{display:flex;justify-content:center;margin-top:22px}
+.small{font-size:12px;color:var(--faint);text-align:center;margin-top:10px}
+
+/* success */
+.ok{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px}
+.ok .ring{width:110px;height:110px;border-radius:50%;background:var(--pt);display:grid;place-items:center;animation:popin .5s cubic-bezier(.2,.9,.3,1.4)}
+@keyframes popin{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
+.ok h2{font-size:22px;font-weight:800;color:#000;margin-top:22px}
+.ok p{font-size:15px;line-height:22px;color:var(--mute);margin-top:8px;max-width:280px}
+.ok .btn{margin-top:26px}
+.conf{position:fixed;inset:0;pointer-events:none;z-index:90;overflow:hidden}
+.conf i{position:absolute;top:-12px;width:8px;height:12px;border-radius:2px;animation:fall 1.6s ease-in forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(540deg);opacity:.9}}
+
+/* add */
+.form{padding:6px 20px 0}
+.fld{margin-top:18px}
+.fld>label{display:block;font-size:13px;font-weight:700;color:var(--mute);margin-bottom:8px}
+.in{width:100%;height:48px;border-radius:12px;border:1.5px solid var(--line);padding:0 14px;font-size:16px;outline:0;background:#fff}
+.in:focus{border-color:var(--p)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.seg button{height:72px;border-radius:14px;border:1.5px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:13px;font-weight:700;color:var(--ink2);background:#fff}
+.seg button.on{border-color:var(--p);background:var(--soft);color:var(--p)}
+.two{display:grid;grid-template-columns:1fr 1.4fr;gap:10px}
+select.in{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23787887' stroke-width='1.6' fill='none'/%3E%3C/svg%3E") no-repeat right 14px center}
+.radio{display:flex;flex-direction:column;gap:8px}
+.radio button{display:flex;align-items:center;gap:10px;height:46px;border-radius:12px;border:1.5px solid var(--line);padding:0 14px;font-size:15px;text-align:left;background:#fff}
+.radio button::before{content:"";width:18px;height:18px;border-radius:50%;border:2px solid #cfcfd8;flex:none}
+.radio button.on{border-color:var(--p)}
+.radio button.on::before{border:5px solid var(--p)}
+
+/* sheet, call, drawer, toast */
+.scrim{position:fixed;inset:0;z-index:60;background:rgba(24,16,40,.4);opacity:0;pointer-events:none;transition:opacity .25s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:61;max-width:430px;margin:0 auto;background:#fff;border-radius:22px 22px 0 0;padding:10px 20px calc(22px + env(safe-area-inset-bottom));transform:translateY(105%);transition:transform .3s cubic-bezier(.2,.8,.2,1);max-height:88vh;overflow:auto}
+html.embed .sheet{max-width:none}
+.sheet.on{transform:none}
+.grab{width:40px;height:4px;border-radius:2px;background:#ddd;margin:0 auto 14px}
+.sheet h3{font-size:18px;font-weight:800;color:#000;display:flex;align-items:center;gap:10px}
+.sheet h3 .av,.sheet h3 .ini{width:36px;height:36px;font-size:14px}
+.sug{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.sug button{text-align:left;padding:11px 14px;border-radius:12px;background:var(--soft);font-size:14px;line-height:20px;color:var(--ink2);border:1.5px solid transparent}
+.sug button.on{border-color:var(--p);color:var(--p)}
+.sheet textarea{width:100%;height:84px;margin-top:12px;border-radius:12px;border:1.5px solid var(--line);padding:10px 12px;font-size:15px;line-height:21px;resize:none;outline:0}
+.sheet textarea:focus{border-color:var(--p)}
+.sheet .center{margin-top:16px}
+.nt{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);width:100%;text-align:left}
+.nt:last-child{border:0}
+.nt .av,.nt .ini{width:42px;height:42px;flex:none}
+.nt b{display:block;font-size:14px;color:#000}
+.nt span{font-size:13px;color:var(--mute)}
+.code{margin-top:16px;border:2px dashed var(--pt2);border-radius:14px;padding:16px;text-align:center}
+.code small{display:block;font-size:12px;color:var(--mute)}
+.code b{display:block;font-size:22px;letter-spacing:3px;color:var(--p);margin-top:4px}
+.call{position:fixed;inset:0;z-index:70;max-width:430px;margin:0 auto;background:linear-gradient(180deg,#5b2aa8,#2b1552);color:#fff;display:flex;flex-direction:column;align-items:center;padding:90px 20px 60px;opacity:0;pointer-events:none;transition:opacity .25s}
+html.embed .call{max-width:none}
+.call.on{opacity:1;pointer-events:auto}
+.call .av,.call .ini{width:120px;height:120px;border:4px solid rgba(255,255,255,.3);font-size:40px}
+.call .pulse{border-radius:50%;animation:pulse 1.6s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,255,255,.35)}100%{box-shadow:0 0 0 28px rgba(255,255,255,0)}}
+.call h2{font-size:26px;font-weight:700;margin-top:28px}
+.call p{font-size:15px;opacity:.75;margin-top:6px}
+.call .end{margin-top:auto;width:68px;height:68px;border-radius:50%;background:#ff4d5e;display:grid;place-items:center;box-shadow:0 10px 24px -8px rgba(255,77,94,.8)}
+.drawer{position:fixed;top:0;bottom:0;left:0;z-index:61;width:min(290px,80vw);background:#fff;transform:translateX(-102%);transition:transform .28s ease;padding:34px 0 20px;display:flex;flex-direction:column}
+.drawer.on{transform:none}
+.drawer .me{display:flex;gap:12px;align-items:center;padding:0 22px 20px;border-bottom:1px solid var(--line)}
+.drawer .me .av{width:50px;height:50px}
+.drawer .me b{display:block;font-size:16px;color:#000}
+.drawer .me span{font-size:13px;color:var(--mute)}
+.drawer nav{padding:10px 0}
+.drawer nav button{width:100%;display:flex;align-items:center;gap:14px;padding:13px 22px;font-size:15px;color:var(--ink2);text-align:left}
+.drawer nav button.on{color:var(--p);font-weight:800;background:var(--soft)}
+.drawer nav .c{margin-left:auto;min-width:22px;height:20px;padding:0 6px;border-radius:10px;background:var(--pt);font-size:11px;font-weight:800;color:var(--p);display:grid;place-items:center}
+.drawer .fine{margin-top:auto;padding:0 22px;font-size:11px;line-height:16px;color:var(--faint)}
+.toast{position:fixed;left:50%;bottom:92px;z-index:95;transform:translate(-50%,16px);opacity:0;background:#241a38;color:#fff;font-size:13px;line-height:18px;padding:10px 16px;border-radius:20px;max-width:86%;text-align:center;transition:all .25s;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+:focus-visible{outline:2px solid var(--p);outline-offset:2px;border-radius:8px}
+.foot{text-align:center;font-size:11px;line-height:16px;color:var(--faint);margin:26px 24px 70px}
+.desk-note{display:none}
+@media (min-width:600px){
+  html:not(.embed) body{padding:28px 0}
+  html:not(.embed) .app{border-radius:26px;min-height:calc(100vh - 56px);box-shadow:0 20px 60px -20px rgba(80,40,140,.3)}
+  html:not(.embed) .desk-note{display:block;text-align:center;font-size:12px;color:#9a8fb8;margin-top:14px}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<p class="desk-note">Celebration reminder app · 2017–18 client concept rebuilt as a clickable prototype. Names and gifts are sample content.</p>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Menu"></aside>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
+<div class="call" id="call" role="dialog" aria-label="Call"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ---------------- data ---------------- */
+const YEAR = 2021;            // the design's calendar (Feb, 1st on a Monday) matches 2021
+const TODAY = {m:1, d:10};    // "today" in the prototype: Wed 10 Feb, as in the design
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const P = n => 'img/'+n+'.webp';
+let uid = 100;
+const EVENTS = [
+  {id:1, name:'Parul',  img:'parul',  type:'birthday',    m:1, d:10, phone:'+91 98450 11223'},
+  {id:2, name:'Arunav', img:'arunav', type:'anniversary', m:1, d:20, phone:'+91 98860 44120'},
+  {id:3, name:'Richa',  img:'richa',  type:'wedding',     m:1, d:20, phone:'+91 99010 72231'},
+  {id:4, name:'Rishab', img:'rishab', type:'birthday',    m:1, d:25, phone:'+91 97411 50982'},
+  {id:5, name:'Kabir',  img:'kabir',  type:'birthday',    m:0, d:8},
+  {id:6, name:'Ananya', img:'ananya', type:'birthday',    m:0, d:26},
+  {id:7, name:'Neha',   img:'neha',   type:'birthday',    m:2, d:3},
+  {id:8, name:'Sanjay', img:'sanjay', type:'birthday',    m:2, d:9},
+  {id:9, name:'Rohan & Kavya', img:'rohan', type:'anniversary', m:2, d:14},
+  {id:10,name:'Meera',  img:'meera',  type:'wedding',     m:2, d:27},
+  {id:11,name:'Leela',  img:'leela',  type:'birthday',    m:3, d:2}
+];
+const GIFTS = [
+  {id:'g1', from:'Sanjay', img:'sanjay', msg:'Many many happy returns of the day :)', amt:1000, valid:'20 Sep', code:'CLB-7K2Q-1000'},
+  {id:'g2', from:'Leela',  img:'leela',  msg:'Hope you had a great day... Miss you loads', amt:1200, valid:'15 Sep', code:'CLB-4M9T-1200'},
+  {id:'g3', from:'Sam',    img:'sam',    msg:'Get something interesting.. Make me proud', amt:1500, valid:'2 Oct', code:'CLB-8R3W-1500'}
+];
+const TYPES = {
+  birthday:{label:'Birthday', wishes:['Happy birthday, {n}! Have the best day and an even better year ahead.','Many happy returns of the day, {n}! Cake is on you today 🎂','Wishing you a year full of good health and happiness, {n}.']},
+  anniversary:{label:'Anniversary', wishes:['Happy anniversary, {n}! Here’s to many more years together.','Congratulations on another beautiful year, {n}!','Wishing you both love and laughter always. Happy anniversary!']},
+  wedding:{label:'Wedding', wishes:['Congratulations on your wedding, {n}! Wishing you a lifetime of happiness.','So happy for you, {n}! Can’t wait to celebrate with you.','Best wishes to you both on your special day!']}
+};
+const S = { m:TODAY.m, sel:null, open:null, wished:{}, gifted:{}, redeemed:{}, notif:true, sheet:null };
+
+/* ---------------- helpers ---------------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+const inr = n => '₹' + Number(n).toLocaleString('en-IN');
+const ev = id => EVENTS.find(e=>e.id==id);
+const dow = (m,d) => new Date(YEAR,m,d).getDay();
+const pad = n => String(n).padStart(2,'0');
+const isToday = e => e.m===TODAY.m && e.d===TODAY.d;
+const first = n => n.split(/\s|&/)[0];
+function face(e, cls='av'){ return e.img ? `<img class="${cls}" src="${P(e.img)}" alt="">` : `<span class="ini">${esc(e.name.trim()[0]||'?').toUpperCase()}</span>`; }
+function when(e){
+  const t = TYPES[e.type].label;
+  if (isToday(e)) return `${t} Today`;
+  return `${t} on ${e.d}, ${DAYS[dow(e.m,e.d)].slice(0,3)}${e.m!==S.m?' '+MONTHS[e.m].slice(0,3):''}`;
+}
+
+/* ---------------- icons ---------------- */
+const ic = {
+  menu:'<svg width="20" height="15" viewBox="0 0 20 15" fill="none" stroke="#414146" stroke-width="1.6" stroke-linecap="round"><path d="M1 1.5h18M1 7.5h18M1 13.5h18"/></svg>',
+  chat:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#414146" stroke-width="1.5"><path d="M12 3a9 9 0 0 0-7.7 13.6L3 21l4.5-1.2A9 9 0 1 0 12 3Z" stroke-linejoin="round"/></svg>',
+  back:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#414146" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H4M10 5l-7 7 7 7"/></svg>',
+  left:'<svg width="12" height="20" viewBox="0 0 12 20" fill="none" stroke="#414146" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2 2 10l8 8"/></svg>',
+  right:'<svg width="12" height="20" viewBox="0 0 12 20" fill="none" stroke="#414146" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m2 2 8 8-8 8"/></svg>',
+  birthday:'<svg width="36" height="34" viewBox="0 0 36 34" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M18 3.5c1.6 1.6 1.6 3.6 0 4.8-1.6-1.2-1.6-3.2 0-4.8Z"/><path d="M18 9v4M8 13h20v6H8zM5 19h26v8H5zM2 30h32"/><path d="M8 19c1.5 2 3 2 4.5 0s3-2 4.5 0 3 2 4.5 0 3-2 4.5 0 3 2 4.5 0" stroke-linecap="round"/></svg>',
+  anniversary:'<svg width="34" height="36" viewBox="0 0 34 36" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h9l-1 9a4 4 0 0 1-7.5 0L5 3ZM9.5 16v13M6 29h7"/><path d="M20 5l8.6 2.4-3.4 8.3a4 4 0 0 1-7.2-2L20 5ZM21.6 17.5 18 30M14.5 29l6.8 1.9"/><path d="M5.6 7.5h8M20 9l8 2.2"/></svg>',
+  wedding:'<svg width="38" height="30" viewBox="0 0 38 30" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="13" cy="18" r="9"/><circle cx="25" cy="18" r="9"/><path d="M10 6l3-4 3 4-3 2.5z" stroke-linejoin="round"/></svg>',
+  text:'<svg width="24" height="22" viewBox="0 0 24 22" fill="#fff"><path d="M3 2h18a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-9l-5 4v-4H3a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z"/><circle cx="7.5" cy="9.5" r="1.5" fill="#984bf8"/><circle cx="12" cy="9.5" r="1.5" fill="#984bf8"/><circle cx="16.5" cy="9.5" r="1.5" fill="#984bf8"/></svg>',
+  call:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h3.5l1.8 4.5-2.3 1.4a11 11 0 0 0 5.1 5.1l1.4-2.3L19 13.5V17a2 2 0 0 1-2 2A15 15 0 0 1 3 5a2 2 0 0 1 2-2Z" fill="#fff"/><path d="M15 3.5a6 6 0 0 1 5.5 5.5M15 7a2.5 2.5 0 0 1 2 2"/></svg>',
+  gift:'<svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><rect x="2.5" y="7" width="19" height="5" rx="1"/><rect x="4" y="12" width="16" height="10" rx="1"/><path d="M12 7c-2-4-6-4.5-6-2s4 2 6 2Zm0 0c2-4 6-4.5 6-2s-4 2-6 2Z" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M11 7h2v15h-2z" fill="#984bf8"/><path d="M12 15.5c-1-1.2-3-1-3 .4 0 1.3 3 3.1 3 3.1s3-1.8 3-3.1c0-1.4-2-1.6-3-.4Z" fill="#984bf8"/></svg>',
+  plus:'<svg width="22" height="22" viewBox="0 0 22 22" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M11 3v16M3 11h16"/></svg>',
+  check:'<svg width="54" height="54" viewBox="0 0 54 54" fill="none" stroke="#984bf8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m14 28 9 9 17-19"/></svg>',
+  end:'<svg width="30" height="30" viewBox="0 0 24 24" fill="#fff"><path d="M12 9c-2.6 0-5.1.5-7.3 1.4a2 2 0 0 0-1.2 1.9v2.3c0 .9.8 1.5 1.6 1.3l3-.8c.6-.2 1-.7 1-1.3v-1.6a13 13 0 0 1 5.8 0v1.6c0 .6.4 1.1 1 1.3l3 .8c.8.2 1.6-.4 1.6-1.3v-2.3a2 2 0 0 0-1.2-1.9C17.1 9.5 14.6 9 12 9Z"/></svg>',
+  home:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/></svg>',
+  giftO:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v9h14v-9M12 8v13M12 8c-2-4-6-4.5-6-2s4 2 6 2Zm0 0c2-4 6-4.5 6-2s-4 2-6 2Z"/></svg>',
+  add:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>',
+  bell:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M6 17V11a6 6 0 0 1 12 0v6l2 2H4zM10 21h4"/></svg>'
+};
+
+/* ---------------- screens ---------------- */
+function home(){
+  const recv = GIFTS.filter(g=>!S.redeemed[g.id]).length;
+  return `<section class="screen" data-s="home">
+    <header class="hdr">
+      <button class="ib" data-menu aria-label="Open menu">${ic.menu}</button>
+      <button data-menu aria-label="Your profile"><img class="av me" src="${P('me')}" alt=""></button>
+      <button class="ib" data-notif aria-label="Notifications">${ic.chat}${S.notif?'<span class="badge">2</span>':''}</button>
+    </header>
+    <button class="banner" data-go="#/gifts">
+      <span class="stack">${GIFTS.map(g=>`<img class="av" src="${P(g.img)}" alt="">`).join('')}</span>
+      <span><b>You have received gift cards for your birthday</b><span class="n">${recv?recv+' to redeem · tap to see':'All redeemed · tap to see'}</span></span>
+    </button>
+    <div class="cal">
+      <div class="mh"><button data-mon="-1" aria-label="Previous month">${ic.left}</button><h2>${MONTHS[S.m]}</h2><button data-mon="1" aria-label="Next month">${ic.right}</button></div>
+      <div class="grid" id="grid">${gridHtml()}</div>
+    </div>
+    <div id="list">${listHtml()}</div>
+    <p class="foot">Portfolio prototype of a 2017–18 client concept. People, messages and gift cards are sample content.</p>
+    <button class="fab" data-go="#/add" aria-label="Add a celebration">${ic.plus}</button>
+  </section>`;
+}
+function gridHtml(){
+  let h = ['Mo','Tu','We','Th','Fr','Sa','Su'].map(x=>`<div class="dow">${x}</div>`).join('');
+  const days = new Date(YEAR,S.m+1,0).getDate();
+  const lead = (new Date(YEAR,S.m,1).getDay()+6)%7;
+  const prevDays = new Date(YEAR,S.m,0).getDate();
+  for (let i=lead;i>0;i--) h += `<div class="d out"><span>${pad(prevDays-i+1)}</span></div>`;
+  for (let d=1; d<=days; d++){
+    const n = EVENTS.filter(e=>e.m===S.m && e.d===d).length;
+    const cls = ['d'];
+    if (S.m===TODAY.m && d===TODAY.d) cls.push('today');
+    if (S.sel===d) cls.push('sel');
+    if (n) cls.push('has');
+    h += `<div class="${cls.join(' ')}" ${n?`data-day="${d}" role="button" tabindex="0" aria-label="${d} ${MONTHS[S.m]}, ${n} event${n>1?'s':''}"`:''}><span>${pad(d)}</span>${n?`<i>${'<b></b>'.repeat(Math.min(n,3))}</i>`:''}</div>`;
+  }
+  const tail = (7 - (lead+days)%7)%7;
+  for (let i=1;i<=tail;i++) h += `<div class="d out"><span>${pad(i)}</span></div>`;
+  return h;
+}
+function listHtml(){
+  let list = EVENTS.filter(e=>e.m===S.m && (!S.sel || e.d===S.sel)).sort((a,b)=>a.d-b.d || a.id-b.id);
+  const lab = S.sel ? `<div class="lab">Events on ${S.sel} ${MONTHS[S.m].slice(0,3)} <button data-all>Show all</button></div>` : `<div class="lab">All Events</div>`;
+  if (!list.length) return lab + `<div class="empty">No celebrations in ${MONTHS[S.m]} yet.<br><button class="btn ghost" data-go="#/add">Add a celebration</button></div>`;
+  return lab + `<div class="evs">${list.map(rowHtml).join('')}</div>${S.m===TODAY.m&&!S.sel?'<p class="hint">Tap a person to text, call or send a gift</p>':''}`;
+}
+function rowHtml(e){
+  const done = [S.wished[e.id]?'Wished':'', S.gifted[e.id]?'Gift sent':''].filter(Boolean);
+  return `<div class="row ${S.open===e.id?'open':''}" data-row="${e.id}">
+    <div class="acts">
+      <button class="act" data-text="${e.id}">${ic.text}Text</button>
+      <button class="act" data-call="${e.id}">${ic.call}Call</button>
+      <button class="act" data-gift="${e.id}">${ic.gift}Gift</button>
+    </div>
+    <div class="card" data-toggle="${e.id}" role="button" tabindex="0" aria-expanded="${S.open===e.id}" aria-label="${esc(e.name)}, ${esc(when(e))}. Show actions">
+      ${face(e)}
+      <div class="t"><b>${esc(e.name)}${done.map(x=>`<span class="tagd">${x}</span>`).join('')}</b><span class="s ${isToday(e)?'today':''}">${esc(when(e))}</span></div>
+      <span class="ic">${ic[e.type]}</span>
+    </div>
+  </div>`;
+}
+function giftsScreen(){
+  const left = GIFTS.filter(g=>!S.redeemed[g.id]).reduce((a,g)=>a+g.amt,0);
+  return `<section class="screen" data-s="gifts">
+    <div class="ttl"><button class="ib" data-back aria-label="Back">${ic.back}</button><h1>Your gifts</h1></div>
+    <div class="sum"><span>Available to redeem</span><b>${inr(left)}</b></div>
+    <div class="gl">${GIFTS.map(g=>`<div class="gc">
+      <div class="top"><div style="flex:1"><div class="msg">${esc(g.msg)}</div><div class="from">${esc(g.from)}</div></div><img class="av" src="${P(g.img)}" alt=""></div>
+      <div class="bot"><span class="amt">${inr(g.amt)}</span><span class="val">Valid till ${g.valid}</span>
+      ${S.redeemed[g.id]?'<span class="pill done">Redeemed</span>':`<button class="pill" data-redeem="${g.id}">Redeem</button>`}</div>
+    </div>`).join('')}</div>
+  </section>`;
+}
+function sendScreen(id){
+  const e = ev(id); if (!e) return home();
+  const st = S.draft && S.draft.id===e.id ? S.draft : (S.draft = {id:e.id, amt:2000, msg:''});
+  return `<section class="screen" data-s="send">
+    <div class="ttl"><button class="ib" data-back aria-label="Back">${ic.back}</button><h1>Send a gift</h1></div>
+    <div class="gcard">
+      ${face(e)}
+      <label>Name</label><div class="v">${esc(e.name)}</div>
+      <label for="amt">Amount</label><div class="amt-in">₹<input id="amt" inputmode="numeric" value="${st.amt}" aria-label="Amount in rupees"></div>
+      <label for="gm">Message (140 Characters)</label>
+      <textarea id="gm" maxlength="140" placeholder="Type your message">${esc(st.msg)}</textarea>
+      <div class="cnt" id="cnt">${st.msg.length}/140</div>
+    </div>
+    <div class="chipsA">${[500,1000,2000,5000].map(a=>`<button class="chipA ${+st.amt===a?'on':''}" data-amt="${a}">${inr(a)}</button>`).join('')}</div>
+    <div class="center"><button class="btn" id="sendBtn" data-send="${e.id}" ${+st.amt>=100?'':'disabled'}>Send gift card</button></div>
+    <p class="small">Gift cards are valid for 6 months. This is a demo, no money moves.</p>
+  </section>`;
+}
+function sentScreen(id){
+  const e = ev(id) || {name:'them'};
+  const g = S.lastGift || {amt:2000};
+  return `<section class="screen ok" data-s="sent">
+    <div class="ring">${ic.check}</div>
+    <h2>Gift card sent!</h2>
+    <p>${esc(first(e.name))} will get your ${inr(g.amt)} gift card${g.msg?' with your message':''} right away.</p>
+    <button class="btn" data-go="#/">Back to celebrations</button>
+  </section>`;
+}
+function addScreen(){
+  const a = S.addDraft || (S.addDraft = {name:'', type:'birthday', m:TODAY.m, d:'', rem:'1 day before'});
+  return `<section class="screen" data-s="add">
+    <div class="ttl"><button class="ib" data-back aria-label="Back">${ic.back}</button><h1>Add a celebration</h1></div>
+    <form class="form" id="addForm" autocomplete="off">
+      <div class="fld"><label for="an">Name</label><input class="in" id="an" name="who" placeholder="Who is celebrating?" value="${esc(a.name)}" maxlength="30"></div>
+      <div class="fld"><label>Occasion</label><div class="seg">${Object.keys(TYPES).map(t=>`<button type="button" class="${a.type===t?'on':''}" data-type="${t}">${ic[t]}${TYPES[t].label}</button>`).join('')}</div></div>
+      <div class="fld"><label>Date</label><div class="two">
+        <select class="in" name="d" aria-label="Day"><option value="">Day</option>${Array.from({length:31},(_,i)=>`<option ${+a.d===i+1?'selected':''}>${i+1}</option>`).join('')}</select>
+        <select class="in" name="m" aria-label="Month">${MONTHS.map((x,i)=>`<option value="${i}" ${+a.m===i?'selected':''}>${x}</option>`).join('')}</select>
+      </div></div>
+      <div class="fld"><label>Remind me</label><div class="radio">${['On the day','1 day before','1 week before'].map(r=>`<button type="button" class="${a.rem===r?'on':''}" data-rem="${r}">${r}</button>`).join('')}</div></div>
+      <div class="center"><button class="btn" id="saveBtn">Save celebration</button></div>
+    </form>
+  </section>`;
+}
+
+/* ---------------- router ---------------- */
+const app = $('#app');
+let depth = 0;
+function dep(h){ return h.startsWith('#/sent')?3 : h.startsWith('#/send')?2 : (h==='#/gifts'||h==='#/add')?1 : 0; }
+function render(keep){
+  const h = location.hash || '#/';
+  let html;
+  if (h.startsWith('#/send/')) html = sendScreen(+h.slice(7));
+  else if (h.startsWith('#/sent/')) html = sentScreen(+h.slice(7));
+  else if (h==='#/gifts') html = giftsScreen();
+  else if (h==='#/add') html = addScreen();
+  else html = home();
+  app.innerHTML = html;
+  const d = dep(h);
+  if (!keep){ if (d<depth) app.firstElementChild.classList.add('back'); scrollTo(0, h==='#/'?(S.homeY||0):0); }
+  else app.firstElementChild.style.animation='none';
+  depth = d; drawer();
+}
+addEventListener('hashchange', ()=>render(false));
+function go(h){ if ((location.hash||'#/')==='#/') S.homeY = scrollY; S.nav = true; location.hash = h; }
+function back(){ if (S.nav && history.length>1) history.back(); else location.hash='#/'; }
+function refresh(){ const g=$('#grid'), l=$('#list'); if (g) g.innerHTML=gridHtml(); if (l) l.innerHTML=listHtml(); const t=$('.mh h2'); if(t) t.textContent=MONTHS[S.m]; }
+
+/* ---------------- overlays ---------------- */
+function scrim(on){ $('#scrim').classList.toggle('on',on); }
+function closeAll(){ $('#sheet').classList.remove('on'); $('#drawer').classList.remove('on'); scrim(false); S.sheet=null; }
+function sheet(html){ const s=$('#sheet'); s.innerHTML='<div class="grab"></div>'+html; s.classList.add('on'); scrim(true); S.sheet=true; setTimeout(()=>{const f=s.querySelector('textarea,button'); if(f) f.focus({preventScroll:true});},320); }
+function drawer(){
+  const h = location.hash||'#/';
+  $('#drawer').innerHTML = `<div class="me"><img class="av" src="${P('me')}" alt=""><div><b>Rahul Mehra</b><span>${EVENTS.length} celebrations saved</span></div></div>
+    <nav>
+      <button data-go="#/" class="${h==='#/'?'on':''}">${ic.home}Celebrations</button>
+      <button data-go="#/gifts" class="${h==='#/gifts'?'on':''}">${ic.giftO}Your gifts<span class="c">${GIFTS.filter(g=>!S.redeemed[g.id]).length}</span></button>
+      <button data-go="#/add" class="${h==='#/add'?'on':''}">${ic.add}Add a celebration</button>
+      <button data-notif>${ic.bell}Reminders${S.notif?'<span class="c">2</span>':''}</button>
+    </nav>
+    <p class="fine">Celebration reminder app, a 2017–18 client concept. Rebuilt as an interactive portfolio prototype with sample content.</p>`;
+}
+let tt; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('on'),2400); }
+function confetti(){
+  const c=document.createElement('div'); c.className='conf'; const cols=['#984bf8','#b061f7','#ffc94d','#ff7ab3','#5ad1a5','#6aa8ff'];
+  for(let i=0;i<60;i++){ const p=document.createElement('i'); p.style.left=Math.random()*100+'%'; p.style.background=cols[i%cols.length]; p.style.animationDelay=(Math.random()*.5)+'s'; p.style.transform=`rotate(${Math.random()*180}deg)`; c.appendChild(p); }
+  document.body.appendChild(c); setTimeout(()=>c.remove(),2400);
+}
+function textSheet(e){
+  const w = TYPES[e.type].wishes.map(x=>x.replace('{n}',first(e.name)));
+  sheet(`<h3>${face(e)}Wish ${esc(first(e.name))}</h3>
+    <div class="sug">${w.map((x,i)=>`<button data-sug="${i}" class="${i===0?'on':''}">${esc(x)}</button>`).join('')}</div>
+    <textarea id="wish" aria-label="Your message" maxlength="200">${esc(w[0])}</textarea>
+    <div class="center"><button class="btn" data-sendwish="${e.id}">Send wishes</button></div>`);
+}
+let ct, cs;
+function callOverlay(e){
+  const c=$('#call'); let sec=0;
+  c.innerHTML = `<div class="pulse">${e.img?`<img class="av" src="${P(e.img)}" alt="">`:`<span class="ini">${esc(e.name[0])}</span>`}</div><h2>${esc(e.name)}</h2><p id="cst">Calling${e.phone?' '+e.phone:''}…</p><button class="end" data-endcall aria-label="End call">${ic.end}</button>`;
+  c.classList.add('on');
+  clearTimeout(ct); clearInterval(cs);
+  ct = setTimeout(()=>{ const p=$('#cst'); if(!p) return; p.textContent='00:00'; cs=setInterval(()=>{ sec++; const q=$('#cst'); if(q) q.textContent=pad(Math.floor(sec/60))+':'+pad(sec%60); },1000); },2200);
+  setTimeout(()=>c.querySelector('.end').focus(),300);
+}
+function endCall(){ clearTimeout(ct); clearInterval(cs); $('#call').classList.remove('on'); toast('Call ended · this is a demo, no real call was made'); }
+
+/* ---------------- events ---------------- */
+document.addEventListener('click', e=>{
+  const t = e.target.closest('button,[data-day],[data-toggle]');
+  if (e.target.id==='scrim'){ closeAll(); return; }
+  if (!t){ if (S.open && !e.target.closest('.row')){ S.open=null; document.querySelectorAll('.row.open').forEach(r=>r.classList.remove('open')); } return; }
+  const ds = t.dataset;
+  if ('menu' in ds){ $('#drawer').classList.add('on'); scrim(true); return; }
+  if (ds.go){ closeAll(); if ((location.hash||'#/')!==ds.go) go(ds.go); else scrollTo(0,0); return; }
+  if ('back' in ds){ back(); return; }
+  if ('notif' in ds){
+    $('#drawer').classList.remove('on');
+    const td = EVENTS.filter(isToday), soon = EVENTS.filter(x=>x.m===TODAY.m && x.d>TODAY.d && x.d-TODAY.d<=10);
+    sheet(`<h3>Reminders</h3>${td.map(x=>`<button class="nt" data-remind="${x.id}">${face(x)}<div><b>${esc(x.name)}’s ${TYPES[x.type].label.toLowerCase()} is today</b><span>Send a wish or a gift before the day ends</span></div></button>`).join('')}
+      <button class="nt" data-go="#/gifts"><img class="av" src="${P('sanjay')}" alt=""><div><b>You received ${GIFTS.length} gift cards</b><span>From Sanjay, Leela and Sam</span></div></button>
+      ${soon.map(x=>`<button class="nt" data-remind="${x.id}">${face(x)}<div><b>${esc(x.name)} · ${TYPES[x.type].label} in ${x.d-TODAY.d} days</b><span>${x.d} ${MONTHS[x.m]}, ${DAYS[dow(x.m,x.d)]}</span></div></button>`).join('')}`);
+    S.notif=false; const b=document.querySelector('.hdr .badge'); if(b) b.remove(); drawer(); return; }
+  if (ds.remind){ closeAll(); const x=ev(ds.remind); if ((location.hash||'#/')!=='#/'){ location.hash='#/'; }
+    S.m=x.m; S.sel=null; S.open=x.id; setTimeout(()=>{ refresh(); const r=document.querySelector(`[data-row="${x.id}"]`); if(r) r.scrollIntoView({behavior:'smooth',block:'center'}); },60); return; }
+  if (ds.mon){ S.m=(S.m+ +ds.mon+12)%12; S.sel=null; S.open=null; refresh(); return; }
+  if (ds.day){ const d=+ds.day; S.sel = S.sel===d?null:d; S.open=null; refresh(); return; }
+  if ('all' in ds){ S.sel=null; refresh(); return; }
+  if (ds.toggle){ const id=+ds.toggle; S.open = S.open===id?null:id; document.querySelectorAll('.row').forEach(r=>{ const on=+r.dataset.row===S.open; r.classList.toggle('open',on); r.querySelector('.card').setAttribute('aria-expanded',on); }); return; }
+  if (ds.text){ textSheet(ev(ds.text)); return; }
+  if (ds.sug){ const s=$('#sheet'); s.querySelectorAll('[data-sug]').forEach(b=>b.classList.toggle('on',b===t)); $('#wish').value=t.textContent; return; }
+  if (ds.sendwish){ const x=ev(ds.sendwish); if(!$('#wish').value.trim()){ $('#wish').focus(); return; } S.wished[x.id]=true; closeAll(); S.open=null; refresh(); toast(`Wishes sent to ${first(x.name)} 🎉`); return; }
+  if (ds.call){ callOverlay(ev(ds.call)); return; }
+  if ('endcall' in ds){ endCall(); return; }
+  if (ds.gift){ S.draft=null; S.open=null; go('#/send/'+ds.gift); return; }
+  if (ds.amt){ S.draft.amt=+ds.amt; $('#amt').value=ds.amt; document.querySelectorAll('[data-amt]').forEach(b=>b.classList.toggle('on',b===t)); $('#sendBtn').disabled=false; return; }
+  if (ds.send){ const x=ev(ds.send); S.lastGift={amt:S.draft.amt,msg:S.draft.msg}; S.gifted[x.id]=true; S.draft=null; location.replace('#/sent/'+x.id); confetti(); return; }
+  if (ds.redeem){ const g=GIFTS.find(x=>x.id===ds.redeem);
+    sheet(`<h3><img class="av" src="${P(g.img)}" alt="">${inr(g.amt)} from ${esc(g.from)}</h3><div class="code"><small>Your gift card code</small><b>${g.code}</b></div><p class="small" style="margin-top:12px">Use it at checkout on any partner store before ${g.valid}.</p><div class="center"><button class="btn" data-doredeem="${g.id}">Redeem now</button></div>`); return; }
+  if (ds.doredeem){ S.redeemed[ds.doredeem]=true; closeAll(); render(true); toast('Gift card redeemed. Enjoy!'); drawer(); return; }
+  if (ds.type){ S.addDraft.type=ds.type; document.querySelectorAll('[data-type]').forEach(b=>b.classList.toggle('on',b===t)); return; }
+  if (ds.rem){ S.addDraft.rem=ds.rem; document.querySelectorAll('[data-rem]').forEach(b=>b.classList.toggle('on',b===t)); return; }
+});
+document.addEventListener('keydown', e=>{
+  if (e.key==='Escape'){ if ($('#call').classList.contains('on')) endCall(); closeAll(); }
+  if ((e.key==='Enter'||e.key===' ') && e.target.matches('[data-day],[data-toggle]')){ e.preventDefault(); e.target.click(); }
+});
+document.addEventListener('input', e=>{
+  if (e.target.id==='gm'){ S.draft.msg=e.target.value; $('#cnt').textContent=e.target.value.length+'/140'; }
+  if (e.target.id==='amt'){ const v=e.target.value.replace(/\D/g,'').slice(0,6); e.target.value=v; S.draft.amt=+v||0; document.querySelectorAll('[data-amt]').forEach(b=>b.classList.toggle('on',+b.dataset.amt===S.draft.amt)); $('#sendBtn').disabled = S.draft.amt<100; }
+  if (e.target.form && e.target.form.id==='addForm'){ const f=e.target.form; Object.assign(S.addDraft,{name:f.who.value, d:f.d.value, m:+f.m.value}); }
+});
+document.addEventListener('change', e=>{ if (e.target.form && e.target.form.id==='addForm'){ const f=e.target.form; Object.assign(S.addDraft,{name:f.who.value, d:f.d.value, m:+f.m.value}); } });
+document.addEventListener('submit', e=>{
+  if (e.target.id!=='addForm') return; e.preventDefault();
+  const a = S.addDraft, f=e.target;
+  if (!a.name.trim()){ toast('Add a name first'); f.who.focus(); return; }
+  if (!a.d){ toast('Pick a day'); f.d.focus(); return; }
+  const max = new Date(YEAR,a.m+1,0).getDate(); if (+a.d>max){ toast(`${MONTHS[a.m]} only has ${max} days`); return; }
+  const n = {id:++uid, name:a.name.trim(), img:null, type:a.type, m:a.m, d:+a.d};
+  EVENTS.push(n); S.m=n.m; S.sel=null; S.open=null; S.addDraft=null; S.homeY=0;
+  location.replace('#/'); setTimeout(()=>{ const r=document.querySelector(`[data-row="${n.id}"]`); if(r){ r.scrollIntoView({behavior:'smooth',block:'center'}); } },80);
+  toast(`Saved. We’ll remind you ${a.rem==='On the day'?'on the day':a.rem}.`);
+});
+$('#scrim').addEventListener('click', closeAll);
+
+render(false);
+</script>
+</body>
+</html>
